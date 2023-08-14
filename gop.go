@@ -32,7 +32,7 @@ func init() {
 	root = modp
 }
 
-func Print(verbose, project, all, list bool, input string) error {
+func Print(verbose, allMode, list bool, input string) error {
 
 	verboseMode = verbose
 	if verboseMode {
@@ -57,11 +57,15 @@ func Print(verbose, project, all, list bool, input string) error {
 		return fmt.Errorf("loadPackages() error: %w", err)
 	}
 
-	if project {
+	if !allMode {
 		//go.modからモジュールを取得
 		modules, err = getModules()
 		if err != nil {
 			return fmt.Errorf("getModules() error: %w", err)
+		}
+
+		if modules == nil {
+			return fmt.Errorf("go.mod not found(switch -all).")
 		}
 	}
 
@@ -74,6 +78,7 @@ func Print(verbose, project, all, list bool, input string) error {
 		}
 	}
 
+	//設定されたモジュールでパッケージを取捨
 	target = removePackages(m, modules, pkgs)
 	//  対象パッケージをすべて表示
 	for _, pkg := range target {
@@ -131,13 +136,15 @@ func findGoMod() string {
 }
 
 func callModules() []string {
+
 	out, err := cmd("go", "list", "-m", "all")
 	if err != nil {
-		log.Printf("%+v", err)
+		if verboseMode {
+			log.Printf("%+v", err)
+		}
 	}
 
 	rtn := strings.Split(out, "\n")
-
 	for idx, line := range rtn {
 		rtn[idx] = strings.Trim(line, "\r\n")
 	}

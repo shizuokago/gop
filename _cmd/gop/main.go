@@ -11,13 +11,13 @@ import (
 
 var (
 	verboseMode bool
-	projectMode bool
+	allMode     bool
 	listMode    bool
 )
 
 func init() {
 	flag.BoolVar(&verboseMode, "v", false, "Verbose mode")
-	flag.BoolVar(&projectMode, "p", false, "Project mode")
+	flag.BoolVar(&allMode, "all", false, "All mode")
 	flag.BoolVar(&listMode, "list", false, "Package List mode")
 }
 
@@ -48,16 +48,12 @@ func main() {
 func run(args []string) error {
 
 	leng := len(args)
-	all := false
 	pkg := ""
-
-	if leng == 0 {
-		all = true
-	} else {
+	if leng != 0 {
 		pkg = args[0]
 	}
 
-	err := gop.Print(verboseMode, projectMode, all, listMode, pkg)
+	err := gop.Print(verboseMode, allMode, listMode, pkg)
 	if err != nil {
 		return xerrors.Errorf("gocd.Print() error: %w", err)
 	}
